@@ -4,15 +4,21 @@
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <iostream>
+#include <array>
 #include <renderer.hpp>
 #include "resource_manager.hpp"
 #include "player.hpp"
+#include "enemy.hpp"
+#include "util.hpp"
+#include "spawning.hpp"
 
 const int SCR_WIDTH = 800;
 const int SCR_HEIGHT = 600;
 bool running = true;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+
+// TODO: Enemy Spawning not implemented, or the enemy class for that matter
 
 int main()
 {
@@ -63,8 +69,13 @@ int main()
 
 	Renderer renderer;
 	ResourceManager::LoadTexture(RESOURCES_PATH"pig.png", true, "pig");
+	Random::Init();
 
 	Player player;
+
+	std::array<Enemy, 50> enemies;
+	Enemy enemy;
+	Spawner spawner;
 
 	float lastFrameTime = 0.0f;
 	float deltaTime = 0.0f;
@@ -77,7 +88,14 @@ int main()
 		lastFrameTime = currentFrame;
 		glfwPollEvents();
 
+		spawner.SpawnEnemies(deltaTime, enemies);
 		player.Move(window, deltaTime);
+
+		for (auto& enemy : enemies)
+		{
+			enemy.Update(window, deltaTime);
+		}
+
 		if (glfwWindowShouldClose(window))
 			running = false;
 		
@@ -92,6 +110,11 @@ int main()
 		ImGui::Text("Working..");
 
 		player.Draw(&renderer);
+
+		for (auto& enemy : enemies)
+		{
+			enemy.Draw(&renderer);
+		}
 
 		ImGui::End();
 		ImGui::Render();
