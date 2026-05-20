@@ -8,18 +8,13 @@ void Player::Draw(Renderer* renderer)
 	ImGui::SliderFloat("PlayerSpeed: ", &this->speed, 0.0f, 600.0f);
 }
 
-Player::Player()
+void Player::Init()
 {
 	pos = glm::vec3(400.0f, 500.0f, 0.0f);
 	
 	size = glm::vec2(ResourceManager::textureMap["pig"].width * 0.3f, ResourceManager::textureMap["pig"].height * 0.3f);
 	rotation = 0.0f;
 	color = glm::vec3(1.0f);
-}
-
-Player::~Player()
-{
-
 }
 
 void Player::Move(GLFWwindow* window, float dt)
@@ -32,4 +27,12 @@ void Player::Move(GLFWwindow* window, float dt)
 	{
 		this->pos.x += speed * dt;
 	}
+
+	if (invulTimer < invulTime)
+		invulTimer += dt;
+}
+
+void Player::Die()
+{
+	this->pos = glm::vec3(350.0f, 500.0f, 0.0f);
 }

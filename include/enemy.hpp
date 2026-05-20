@@ -3,6 +3,8 @@
 #include <glfw/glfw3.h>
 #include <renderer.hpp>
 
+class Player;
+
 class Enemy
 {
 private:
@@ -20,4 +22,6 @@ public:
 	
 	void Draw(Renderer* renderer);
 	void Update(GLFWwindow* window, float dt);
+
+	friend bool checkCollisions(Player& player, Enemy& enemy);
 };

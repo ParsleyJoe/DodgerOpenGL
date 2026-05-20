@@ -4,6 +4,7 @@
 
 void Spawner::SpawnEnemies(float dt, std::array<Enemy, 50>& enemies)
 {
+	EnemyBoundsCheck(enemies);
 	if (this->spawnTimer < this->spawnCoolDown)
 	{
 		spawnTimer += dt;
@@ -24,8 +25,23 @@ void Spawner::SpawnEnemies(float dt, std::array<Enemy, 50>& enemies)
 		return;
 	}
 
-	auto& enemy = enemies[i];
+	this->ResetEnemy(enemies[i]);
+}
+
+void Spawner::EnemyBoundsCheck(std::array<Enemy, 50>& enemies)
+{
+	for (auto& enemy : enemies)
+	{
+		if (enemy.active && enemy.pos.y >= SCR_HEIGHT)
+		{
+			enemy.active = false;
+		}
+	}
+}
+
+void Spawner::ResetEnemy(Enemy& enemy)
+{
 	enemy.active = true;
 	int rand = Random::InRange(0, 700.0f);
-	enemy.pos = glm::vec3(static_cast<float>(rand), enemy.pos.y, enemy.pos.z);
+	enemy.pos = glm::vec3(static_cast<float>(rand), -50.0f, enemy.pos.z);
 }

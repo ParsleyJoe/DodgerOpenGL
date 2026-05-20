@@ -5,8 +5,10 @@
 class Spawner
 {
 private:
-	float spawnCoolDown = 3.0f;
+	float spawnCoolDown = 1.0f;
 	float spawnTimer = 0.0f;
 public:
 	void SpawnEnemies(float dt, std::array<Enemy, 50>& enemies);
+	void ResetEnemy(Enemy& enemy);
+	void EnemyBoundsCheck(std::array<Enemy, 50>& enemies);
 };

@@ -4,16 +4,13 @@
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <iostream>
-#include <array>
-#include <renderer.hpp>
-#include "resource_manager.hpp"
-#include "player.hpp"
-#include "enemy.hpp"
-#include "util.hpp"
-#include "spawning.hpp"
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
-const int SCR_WIDTH = 800;
-const int SCR_HEIGHT = 600;
+
+#include "game.hpp"
+#include "util.hpp"
+
 bool running = true;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -63,19 +60,41 @@ int main()
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
+
+
+	FT_Library ft;
+	if (FT_Init_FreeType(&ft))
+	{
+		std::cout << "ERROR::FREETYPE: Could not init FreeType libraray" << std::endl;
+	}
+
+	FT_Face face;
+	if (FT_New_Face(ft, RESOURCES_PATH"PixelifySans.ttf", 0, &face))
+	{
+		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+		return -1;
+	}
+	FT_Set_Pixel_Sizes(face, 0, 48);
+	if (FT_Load_Char(face, 'X', FT_LOAD_RENDER))
+	{
+		std::cout << "ERROR::FREETYPE: Failed to load Glyph" << std::endl;
+		return -1;
+	}
+
+	// Function to initialize global std::map characters
+	InitCharacters(face);
+
+	FT_Done_Face(face);
+	FT_Done_FreeType(ft);
+
+
 	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	Renderer renderer;
-	ResourceManager::LoadTexture(RESOURCES_PATH"pig.png", true, "pig");
-	Random::Init();
-
-	Player player;
-
-	std::array<Enemy, 50> enemies;
-	Enemy enemy;
-	Spawner spawner;
+	// Game Class
+	Game game;
+	game.Init();
 
 	float lastFrameTime = 0.0f;
 	float deltaTime = 0.0f;
@@ -88,18 +107,12 @@ int main()
 		lastFrameTime = currentFrame;
 		glfwPollEvents();
 
-		spawner.SpawnEnemies(deltaTime, enemies);
-		player.Move(window, deltaTime);
-
-		for (auto& enemy : enemies)
-		{
-			enemy.Update(window, deltaTime);
-		}
+		game.Update(window, deltaTime);
 
 		if (glfwWindowShouldClose(window))
 			running = false;
 		
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClearColor(0.0f, 0.4f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
@@ -109,12 +122,7 @@ int main()
 		ImGui::Begin("Debug");
 		ImGui::Text("Working..");
 
-		player.Draw(&renderer);
-
-		for (auto& enemy : enemies)
-		{
-			enemy.Draw(&renderer);
-		}
+		game.Draw();
 
 		ImGui::End();
 		ImGui::Render();
